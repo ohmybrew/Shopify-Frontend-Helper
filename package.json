@@ -1,0 +1,39 @@
+{
+  "name": "shopify-frontend-api",
+  "author": "Tyler King <tyler.king@littlerocket.io>",
+  "keywords": [
+    "shopify",
+    "frontend",
+    "api"
+  ],
+  "version": "1.0.0",
+  "description": "A basic JS/TS library for frontend Shopify API for common tasks.",
+  "main": "lib/index",
+  "license": "MIT",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib/index.js",
+    "lib/index.d.ts",
+    "dist/sfa.js",
+    "dist/sfa.min.js"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:browser": "browserify ./src/index.ts -o dist/sfa.js -t [ babelify --presets [ @babel/preset-env ] ] -p [ tsify ] --standalone SFA && uglifyjs --compress --mangle -o dist/sfa.min.js -- dist/sfa.js",
+    "prepare": "npm run build && npm run build:browser"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "@types/node": "^11.9.4",
+    "acorn": "^6.1.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
+    "tsify": "^4.0.1",
+    "tslib": "^1.9.3",
+    "tslint": "^5.12.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "typescript": "^3.2.2",
+    "uglify-js": "^3.4.9"
+  }
+}
