@@ -187,6 +187,8 @@ export class Cart extends Shopify {
       data.forEach((cartData: IHashTable) => {
         tasks.push(() => Cart.request({ method: 'POST', endpoint: '/cart/add.js', data: cartData }));
       });
+      tasks.push(() => Cart.get());
+
       return tasks.reduce((p, task) => p.then(task), Promise.resolve());
     }
 

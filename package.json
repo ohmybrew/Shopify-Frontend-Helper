@@ -6,7 +6,7 @@
     "frontend",
     "api"
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A basic JS/TS library for frontend Shopify API for common tasks.",
   "main": "lib/index",
   "license": "MIT",

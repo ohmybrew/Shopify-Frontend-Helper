@@ -104,7 +104,7 @@ Code is written in TypeScript based in `src` directory.
 
 ## Packaging
 
-`npm prepare` will compile the TypeScript, run Babelify and Browserify.
+`npm run prepare` will compile the TypeScript, run Babelify and Browserify.
 
 This will output TypeScript compile to `lib` directory.
 This will output minfied browser compatible Javascript to `dist` directory.
