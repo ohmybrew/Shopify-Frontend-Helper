@@ -45,9 +45,9 @@ export declare class Checkout extends Shopify {
      */
     static applyDiscount(discount: string): Promise<XMLHttpRequest>;
     /**
-     * Verifies the discount code.
-     * @param discount - The discount code to verify.
-     */
+   * Verifies the discount code.
+   * @param discount - The discount code to verify.
+   */
     static verifyDiscount(discount?: string): Promise<boolean | IHashTable>;
 }
 /**

@@ -98,48 +98,91 @@ export class Checkout extends Shopify {
     return Checkout.request({ method: 'HEAD', endpoint: `/discount/${discount}` });
   }
 
-  /**
+    /**
    * Verifies the discount code.
    * @param discount - The discount code to verify.
    */
   static async verifyDiscount(discount?: string): Promise<boolean | IHashTable> {
+    // Parse the DOM, easy way
     const response = await Checkout.checkout();
-    const valid = response.indexOf('data-discount-success') > -1;
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(response, 'text/html');
 
-    if (valid) {
-      // Parse the DOM, easy way
-      const parser = new DOMParser();
-      const htmlDoc = parser.parseFromString(response, 'text/html');
-      const htmlQs = (query: string) => (htmlDoc.querySelector(query) as HTMLElement);
+    /**
+     * Query selector shortcut.
+     * @param query - The query string.
+     * @param target - The node target.
+     */
+    const htmlQs = (query: string, target: Document = htmlDoc) => {
+      return (target.querySelector(query) as HTMLElement);
+    };
 
-      // Get specifics we need
-      const discountCode = (
-        htmlQs('[data-discount-success] .reduction-code__text') ||
-        htmlQs('.applied-reduction-code__information')
-      ).innerHTML.trim();
-      const discountAmount = parseFloat(
-        htmlQs('[data-checkout-discount-amount-target]').dataset.checkoutDiscountAmountTarget as string,
+    /**
+     * Query selector all shortcut.
+     * @param query - The query string.
+     * @param target - The node target.
+     */
+    const htmlQsa = (query: string, target: Document = htmlDoc) => {
+      return (target.querySelectorAll(query) as NodeListOf<HTMLElement>);
+    };
+
+    let discountCode: string;
+    let discountAmount: number;
+    let discountType: string;
+
+    if (response.indexOf('data-discount-success') > -1) {
+      // Whole cart promo code, get the discount code
+      discountCode = htmlQs('[data-discount-success] .reduction-code__text').innerHTML.trim();
+
+      // Get the total discount
+      discountAmount = parseFloat(
+        htmlQs('[data-checkout-discount-amount-target]').dataset.checkoutDiscountAmountTarget,
       );
-      const discountType = htmlQs('[data-discount-type]').dataset.discountType;
 
-      // Build the result object
-      const result = {
-        code: discountCode,
-        type: discountType,
-        discount: discountAmount,
-      };
+      // Get the discount type (percent/amount)
+      discountType = htmlQs('[data-discount-type]').dataset.discountType;
+    } else if (response.indexOf('id="checkout_clear_discount"') > -1) {
+      // Item discount, get the discount code
+      discountCode = htmlQs('[data-reduction-form="true"] .reduction-code .reduction-code__text')
+        .innerHTML
+        .match(/([a-z0-9_-]+)\s?/i)[1]
+        .trim()
+      ;
 
-      // Check discount validity if discount code was passed into function
-      if (discount !== undefined) {
-        return result.code.toUpperCase() === discount.toUpperCase() ? result : false;
-      }
+      // Build the total discount
+      discountAmount = [...htmlQsa('.order-summary .reduction-code .reduction-code__text')].reduce(
+        (acc, node) => {
+          const match = node.innerHTML.match(/\(\-\$([0-9.,]+)\)/);
+          if (match && node.innerHTML.indexOf(discountCode) > -1) {
+            return parseFloat(match[1].replace(/[^0-9]+/g, '')) + acc;
+          }
 
-      // Return result for no discount checking
-      return result;
+          return 0 + acc;
+        },
+        0,
+      );
+
+      // Theres no type for this type of discount
+      discountType = 'unknown';
+    } else {
+      // Not a valid code
+      return false;
+    }
+
+    // Build the result object
+    const result = {
+      code: discountCode,
+      type: discountType,
+      discount: discountAmount,
+    };
+
+    // Check discount validity if discount code was passed into function
+    if (discount !== undefined) {
+      return result.code.toUpperCase() === discount.toUpperCase() ? result : false;
     }
 
     // Not a valid code
-    return false;
+    return result;
   }
 }
 
