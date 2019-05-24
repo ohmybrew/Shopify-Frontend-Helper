@@ -8,7 +8,7 @@ Written in TypeScript with exports to plain Javascript and Browser (through Brow
 
 ### Node
 
-`npm i --save git://bitbucket.org:littlerocket/shopify-frontend-api`
+`npm i --save git://github.com/ohmybrew/Shopify-Frontend-Helper`
 
 ### Browser
 
